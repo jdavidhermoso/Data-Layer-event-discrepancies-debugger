@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "GA event discrepancies debugger",
+  "version": "1.0",
+  "description": "This chrome extension finds and allows you to export discrepancies between a GA event accross multiple pages, to ensure data consistency",
+  "permissions": ["storage"],
+  "author": "David Hermoso",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

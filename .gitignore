@@ -1,0 +1,31 @@
+# Node modules (if you ever use npm)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Chrome extension build outputs (if any)
+dist/
+build/
+
+# VSCode settings
+.vscode/
+
+# IDE
+.idea
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Chrome extension local storage or backup
+*.localstorage
+*.bak
+
+# Ignore generated zip for Chrome extension
+*.zip
