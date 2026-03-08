@@ -1,7 +1,7 @@
-const TARGET_EVENT = "YOUR_GA_EVENT";
+const TARGET_EVENT = "add_to_cart";
 
 const MODEL_EVENT = {
-    event: "YOUR_GA_EVENT"
+    event: "add_to_cart"
 };
 
 const IGNORE_KEYS = ["timestamp", "sessionId"];
@@ -108,7 +108,7 @@ function handleEvent(item) {
     if (modelDiffs.length > 0) {
         hasDiscrepancy = true;
         modelDiffs.forEach(d => {
-            diffsToExport[d.property] = { url, valor: clonedItem[d.property] };
+            diffsToExport[d.property] = { url, value: clonedItem[d.property] };
         });
     }
 
@@ -117,7 +117,7 @@ function handleEvent(item) {
         if (diffs.length > 0) {
             hasDiscrepancy = true;
             diffs.forEach(d => {
-                diffsToExport[d.property] = { url, valor: clonedItem[d.property] };
+                diffsToExport[d.property] = { url, value: clonedItem[d.property] };
             });
         }
     });
@@ -154,9 +154,9 @@ function exportEvents() {
     discrepantEvents.forEach(e => {
         const url = e.url;
         const diffs = e.diffs || {};
-        Object.entries(diffs).forEach(([prop, { valor }]) => {
+        Object.entries(diffs).forEach(([prop, { value }]) => {
             if (!exportObj[prop]) exportObj[prop] = {};
-            exportObj[prop][url] = { valor };
+            exportObj[prop][url] = { value };
         });
     });
 
@@ -164,7 +164,7 @@ function exportEvents() {
     const urlBlob = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = urlBlob;
-    a.download = "YOUR_GA_EVENT_discrepancies.json";
+    a.download = "add_to_cart_discrepancies.json";
     a.click();
     URL.revokeObjectURL(urlBlob);
 }
