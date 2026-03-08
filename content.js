@@ -6,7 +6,7 @@ const MODEL_EVENT = {
 
 const IGNORE_KEYS = ["timestamp", "sessionId"];
 
-let addToCartEvents = [];
+let userEvents = [];
 
 function createPanel() {
     const panel = document.createElement("div");
@@ -26,9 +26,6 @@ function createPanel() {
     panel.style.borderTop = "3px solid #4CAF50";
 
     let messageHTML = '';
-    if (TARGET_EVENT === "YOUR_GA_EVENT") {
-        messageHTML = `<div style="padding:10px; color:red; font-weight:bold;">⚠ Replace YOUR_GA_EVENT with the real GA event name!</div>`;
-    }
 
     panel.innerHTML = `
     <div style="padding:10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ccc;">
@@ -45,8 +42,8 @@ function createPanel() {
     document.body.appendChild(panel);
 
     document.getElementById("dl-clear").onclick = () => {
-        addToCartEvents = [];
-        chrome.storage.local.remove("addToCartEvents");
+        userEvents = [];
+        chrome.storage.local.remove("userEvents");
         render();
     };
 
@@ -57,7 +54,7 @@ function render() {
     const container = document.getElementById("dl-events");
     if (!container) return;
 
-    container.innerHTML = addToCartEvents
+    container.innerHTML = userEvents
         .map((e, i) => `
       <div style="padding:6px;border-bottom:1px solid #333">
         <div><b>${i}</b> - ${e.url} - ${e.time} ${e.hasDiscrepancy ? "(discrepancy)" : ""}</div>
@@ -100,7 +97,7 @@ function compareEvents(event1, event2) {
     return discrepancies;
 }
 
-function handleAddToCart(item) {
+function handleEvent(item) {
     const url = window.location.pathname;
     const clonedItem = safeClone(item);
 
@@ -115,7 +112,7 @@ function handleAddToCart(item) {
         });
     }
 
-    addToCartEvents.forEach(prev => {
+    userEvents.forEach(prev => {
         const diffs = compareEvents(prev.data, clonedItem);
         if (diffs.length > 0) {
             hasDiscrepancy = true;
@@ -133,20 +130,27 @@ function handleAddToCart(item) {
         data: clonedItem
     };
 
-    addToCartEvents.push(eventObj);
-    chrome.storage.local.set({ addToCartEvents });
+    userEvents.push(eventObj);
+    chrome.storage.local.set({ userEvents: userEvents });
     render();
 }
 
 function exportEvents() {
-    const discrepantEvents = addToCartEvents.filter(e => e.hasDiscrepancy);
+    const discrepantEvents = userEvents.filter(e => e.hasDiscrepancy);
 
     if (discrepantEvents.length === 0) {
         alert("No discrepancies to export.");
         return;
     }
 
-    const exportObj = {};
+    const exportObj = {
+        "_metadata": {
+            "message": "This json file was generated using the extension Data Layer event discrepancies debugger by David Hermoso.",
+            "linkedin": "https://www.linkedin.com/in/jdavidhermoso/",
+            "github": "https://github.com/jdavidhermoso/Data-Layer-event-discrepancies-debugger"
+        }
+    };
+
     discrepantEvents.forEach(e => {
         const url = e.url;
         const diffs = e.diffs || {};
@@ -177,7 +181,7 @@ window.addEventListener("message", (event) => {
     if (event.data?.type === "DATALAYER_EVENT") {
         event.data.payload.forEach((item) => {
             if (item?.event === TARGET_EVENT) {
-                handleAddToCart(item);
+                handleEvent(item);
             }
         });
     }
@@ -186,8 +190,8 @@ window.addEventListener("message", (event) => {
 function init() {
     injectScript();
 
-    chrome.storage.local.get("addToCartEvents", (res) => {
-        addToCartEvents = res.addToCartEvents || [];
+    chrome.storage.local.get("userEvents", (res) => {
+        userEvents = res.userEvents || [];
         render();
     });
 

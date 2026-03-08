@@ -1,5 +1,9 @@
 # DataLayer DISCREPANCIES DEBUGGER - Chrome Extension
 
+![DataLayer Inspector Panel Preview](./logo.png)
+
+Extension created by David Hermoso https://www.linkedin.com/in/jdavidhermoso/
+
 ## Description
 
 This Chrome extension allows you to **capture and analyze discrepancies** in the GA event (IN THE CODE I LET A PLACEHOLDER YOUR_GA_EVENT, THAT YOU CAN CHANGE) sent to your website’s `dataLayer`.  
@@ -44,3 +48,6 @@ The extension:
     "/url1": { "value": ... }
   }
 }
+```
+
+Extension icons were generated using this tool: https://github.com/alexleybourne/chrome-extension-icon-generator/tree/main
