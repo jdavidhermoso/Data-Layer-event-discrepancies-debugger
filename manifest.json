@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Data Layer event discrepancies debugger by David Hermoso",
   "version": "1.0",
-  "description": "This chrome extension finds and allows you to export discrepancies between a GA event accross multiple pages, to ensure data consistency",
+  "description": "This chrome extension finds and allows you to export discrepancies between a GA event in multiple pages, to ensure data consistency",
   "permissions": ["storage"],
   "options_page": "options.html",
   "author": "David Hermoso",
