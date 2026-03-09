@@ -1,7 +1,7 @@
-const TARGET_EVENT = "add_to_cart";
+let TARGET_EVENT = "";
 
-const MODEL_EVENT = {
-    event: "add_to_cart"
+let MODEL_EVENT = {
+    event: ""
 };
 
 const IGNORE_KEYS = ["timestamp", "sessionId"];
@@ -80,15 +80,15 @@ function safeClone(obj) {
     );
 }
 
-function compareEvents(event1, event2) {
+function compareItems(item1, item2) {
     const discrepancies = [];
-    if (!event1 || !event2) return discrepancies;
+    if (!item1 || !item2) return discrepancies;
 
-    const keys = new Set([...Object.keys(event1), ...Object.keys(event2)]);
+    const keys = new Set([...Object.keys(item1), ...Object.keys(item2)]);
     keys.forEach(key => {
         if (IGNORE_KEYS.includes(key)) return;
-        const val1 = event1[key];
-        const val2 = event2[key];
+        const val1 = item1[key];
+        const val2 = item2[key];
         if (JSON.stringify(val1) !== JSON.stringify(val2)) {
             discrepancies.push({ property: key, value1: val1, value2: val2 });
         }
@@ -97,27 +97,32 @@ function compareEvents(event1, event2) {
     return discrepancies;
 }
 
-function handleEvent(item) {
+function handleEvent(event) {
     const url = window.location.pathname;
-    const clonedItem = safeClone(item);
+    const clonedEvent = safeClone(event);
+    const eventItem = clonedEvent || null;
+    const modelItem = MODEL_EVENT || null;
+
+    if (!eventItem) return;
 
     let diffsToExport = {};
     let hasDiscrepancy = false;
 
-    const modelDiffs = compareEvents(MODEL_EVENT, clonedItem);
+    const modelDiffs = compareItems(modelItem, eventItem);
     if (modelDiffs.length > 0) {
         hasDiscrepancy = true;
         modelDiffs.forEach(d => {
-            diffsToExport[d.property] = { url, value: clonedItem[d.property] };
+            diffsToExport[d.property] = { url, value: eventItem[d.property] };
         });
     }
 
     userEvents.forEach(prev => {
-        const diffs = compareEvents(prev.data, clonedItem);
+        const prevItem = prev.data || null;
+        const diffs = compareItems(prevItem, eventItem);
         if (diffs.length > 0) {
             hasDiscrepancy = true;
             diffs.forEach(d => {
-                diffsToExport[d.property] = { url, value: clonedItem[d.property] };
+                diffsToExport[d.property] = { url, value: eventItem[d.property] };
             });
         }
     });
@@ -127,12 +132,22 @@ function handleEvent(item) {
         time: new Date().toISOString(),
         hasDiscrepancy,
         diffs: diffsToExport,
-        data: clonedItem
+        data: clonedEvent
     };
 
     userEvents.push(eventObj);
-    chrome.storage.local.set({ userEvents: userEvents });
+    chrome.storage.local.set({ userEvents });
     render();
+}
+
+function isAllowedDomain(allowedDomains) {
+
+    const hostname = window.location.hostname;
+
+    return allowedDomains.some(domain =>
+        hostname === domain || hostname.endsWith("." + domain)
+    );
+
 }
 
 function exportEvents() {
@@ -164,9 +179,29 @@ function exportEvents() {
     const urlBlob = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = urlBlob;
-    a.download = "add_to_cart_discrepancies.json";
+    a.download = `${TARGET_EVENT}_discrepancies.json`;
     a.click();
     URL.revokeObjectURL(urlBlob);
+}
+
+let ALLOWED_DOMAINS = [];
+function loadSettings(callback) {
+
+    chrome.storage.sync.get(
+        {
+            TARGET_EVENT: "",
+            MODEL_EVENT_NAME: "",
+            ALLOWED_DOMAINS: []
+        },
+        (items) => {
+
+            TARGET_EVENT = items.TARGET_EVENT;
+            MODEL_EVENT.event = items.MODEL_EVENT_NAME;
+            ALLOWED_DOMAINS = items.ALLOWED_DOMAINS;
+
+            callback();
+        }
+    );
 }
 
 function injectScript() {
@@ -188,19 +223,29 @@ window.addEventListener("message", (event) => {
 });
 
 function init() {
-    injectScript();
 
-    chrome.storage.local.get("userEvents", (res) => {
-        userEvents = res.userEvents || [];
-        render();
+    loadSettings(() => {
+
+        if (!isAllowedDomain(ALLOWED_DOMAINS)) {
+            return;
+        }
+
+        injectScript();
+
+        chrome.storage.local.get("userEvents", (res) => {
+            userEvents = res.userEvents || [];
+            render();
+        });
+
+        const waitBody = setInterval(() => {
+            if (document.body) {
+                clearInterval(waitBody);
+                createPanel();
+            }
+        }, 50);
+
     });
 
-    const waitBody = setInterval(() => {
-        if (document.body) {
-            clearInterval(waitBody);
-            createPanel();
-        }
-    }, 50);
 }
 
 init();

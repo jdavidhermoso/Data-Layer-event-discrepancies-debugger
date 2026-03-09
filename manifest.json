@@ -4,7 +4,9 @@
   "version": "1.0",
   "description": "This chrome extension finds and allows you to export discrepancies between a GA event accross multiple pages, to ensure data consistency",
   "permissions": ["storage"],
+  "options_page": "options.html",
   "author": "David Hermoso",
+  "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

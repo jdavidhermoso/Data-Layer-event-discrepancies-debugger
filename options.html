@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DataLayer Inspector Settings</title>
+    <style>
+        body { font-family: Arial; padding:20px; }
+        label { display:block; margin-top:10px; }
+        input { padding:5px; width:300px; }
+        button { margin-top:15px; padding:6px 12px; }
+    </style>
+</head>
+<body>
+
+<h2>Extension Settings</h2>
+
+<label>Target Event</label>
+<input id="targetEvent" placeholder="GA EVENT">
+
+<label>Model Event Name</label>
+<input id="modelEvent" placeholder="GA EVENT">
+
+<label>Allowed Domains</label>
+<input id="domains" placeholder="example.com, shop.com">
+
+<small>Comma separated domains</small>
+
+<br>
+<button id="save">Save</button>
+
+<p id="status"></p>
+
+<script src="options.js"></script>
+
+</body>
+</html>
